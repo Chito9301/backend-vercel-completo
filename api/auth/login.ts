@@ -14,8 +14,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!user) return sendJSON(res, 401, { error: "Credenciales inválidas" });
     const ok = await (user as any).comparePassword(password);
     if (!ok) return sendJSON(res, 401, { error: "Credenciales inválidas" });
-    const token = signJwt({ sub: (user as any)._id.toString(), email: user.email });
-    return sendJSON(res, 200, { user: { id: (user as any)._id, username: (user as any).username, email: user.email }, token });
+    const token = signJwt({ sub: (user as any)._id.toString(), email });
+    return sendJSON(res, 200, { user: { id: (user as any)._id, username: (user as any).username, email }, token });
   } catch (e:any) {
     return sendJSON(res, 500, { error: e.message || "Error interno" });
   }

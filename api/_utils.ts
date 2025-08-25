@@ -5,7 +5,8 @@ export function sendJSON(res: VercelResponse, status: number, data: any) {
 }
 
 export function methodGuard(req: VercelRequest, res: VercelResponse, allowed: string[]) {
-  if (!allowed.includes(req.method || "")) {
+  const method = req.method || "";
+  if (!allowed.includes(method)) {
     res.setHeader("Allow", allowed);
     res.status(405).json({ error: "Method Not Allowed" });
     return false;

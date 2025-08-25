@@ -3,7 +3,7 @@ import mongoose, { Schema, InferSchemaType, Types } from "mongoose";
 const MediaSchema = new Schema({
   url: { type: String, required: true },
   publicId: { type: String, required: true },
-  resourceType: { type: String }, // image, video, raw (audio entra como raw en Cloudinary)
+  resourceType: { type: String }, // image | video | raw
   format: { type: String },
   bytes: { type: Number },
   createdBy: { type: Types.ObjectId, ref: "User" }

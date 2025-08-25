@@ -1,27 +1,17 @@
 import mongoose from "mongoose";
 
-const MONGODB_URI = process.env.MONGODB_URI as string;
-if (!MONGODB_URI) {
-  throw new Error("Missing MONGODB_URI");
-}
+const uri = process.env.MONGODB_URI as string;
+if (!uri) throw new Error("Missing MONGODB_URI");
 
-interface GlobalWithMongoose {
-  mongoose: { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null };
-}
-
-const globalAny = global as unknown as GlobalWithMongoose;
-
-if (!globalAny.mongoose) {
-  globalAny.mongoose = { conn: null, promise: null };
-}
+type GlobalCache = { conn: typeof mongoose | null; promise: Promise<typeof mongoose> | null };
+const g = global as unknown as { _mongoose?: GlobalCache };
+g._mongoose ||= { conn: null, promise: null };
 
 export async function dbConnect() {
-  if (globalAny.mongoose.conn) return globalAny.mongoose.conn;
-  if (!globalAny.mongoose.promise) {
-    globalAny.mongoose.promise = mongoose.connect(MONGODB_URI, {
-      dbName: process.env.MONGODB_DB || undefined
-    });
+  if (g._mongoose!.conn) return g._mongoose!.conn;
+  if (!g._mongoose!.promise) {
+    g._mongoose!.promise = mongoose.connect(uri, { dbName: process.env.MONGODB_DB || undefined });
   }
-  globalAny.mongoose.conn = await globalAny.mongoose.promise;
-  return globalAny.mongoose.conn;
+  g._mongoose!.conn = await g._mongoose!.promise;
+  return g._mongoose!.conn;
 }

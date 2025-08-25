@@ -1,27 +1,27 @@
 import jwt from "jsonwebtoken";
 import type { IncomingHttpHeaders } from "http";
 
-const JWT_SECRET = process.env.JWT_SECRET as string;
-if (!JWT_SECRET) {
-  throw new Error("Missing JWT_SECRET");
-}
+const SECRET = process.env.JWT_SECRET as string;
+if (!SECRET) throw new Error("Missing JWT_SECRET");
 
-export interface JwtPayloadCustom {
+export interface JwtPayload {
   sub: string;
   email?: string;
+  iat?: number;
+  exp?: number;
 }
 
-export function signJwt(payload: JwtPayloadCustom, expiresIn: string = "7d") {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn });
+export function signJwt(payload: Omit<JwtPayload, "iat" | "exp">, expiresIn = "7d") {
+  return jwt.sign(payload, SECRET, { expiresIn });
 }
 
-export function verifyJwt(token: string): JwtPayloadCustom {
-  return jwt.verify(token, JWT_SECRET) as JwtPayloadCustom;
+export function verifyJwt(token: string): JwtPayload {
+  return jwt.verify(token, SECRET) as JwtPayload;
 }
 
-export function getTokenFromHeaders(headers: IncomingHttpHeaders) {
-  const raw = (headers as any).authorization || (headers as any).Authorization;
-  if (!raw || typeof raw !== "string") return null;
+export function getBearer(headers: IncomingHttpHeaders) {
+  const raw = (headers.authorization || (headers as any).Authorization) as string | undefined;
+  if (!raw) return null;
   const [scheme, token] = raw.split(" ");
   if (scheme?.toLowerCase() !== "bearer" || !token) return null;
   return token;
